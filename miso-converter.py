@@ -70,9 +70,16 @@ for dirpath, _, filenames in os.walk(root_dir):
 # Step 3.5: Fix directories with .ipynb extension (students who zipped notebooks directly)
 for dirpath, dirnames, _ in os.walk(root_dir, topdown=False):
     for dirname in dirnames:
-        if dirname.endswith(".ipynb"):
+        if dirname.lower().endswith(".ipynb"):
             old_path = os.path.join(dirpath, dirname)
-            new_dirname = dirname.replace(".ipynb", "")
+            # Remove the extension case-insensitively
+            if dirname.endswith(".ipynb"):
+                new_dirname = dirname[:-6]
+            elif dirname.endswith(".IPYNB"):
+                new_dirname = dirname[:-6]
+            else:
+                # Handle mixed case
+                new_dirname = dirname[:dirname.lower().rfind(".ipynb")]
             new_path = os.path.join(dirpath, new_dirname)
             
             # If the new path already exists, merge contents
@@ -103,7 +110,7 @@ for dirpath, dirnames, _ in os.walk(root_dir):
 for dirpath, _, filenames in os.walk(root_dir):
     print(f"{COLOR_BLUE}Currently in directory: {dirpath}{COLOR_RESET}")  # Check each directory
     for file in filenames:
-        if file.endswith(".ipynb"):
+        if file.lower().endswith(".ipynb"):
             full_path = os.path.join(dirpath, file)
             print(f"{COLOR_GREEN}Found notebook: {full_path}{COLOR_RESET}")
 
@@ -138,7 +145,14 @@ for dirpath, _, filenames in os.walk(root_dir):
                 script, _ = exporter.from_notebook_node(notebook_content)
 
                 # Write the Python script
-                py_file = full_path.replace(".ipynb", ".py")
+                # Replace .ipynb extension case-insensitively
+                if full_path.endswith(".ipynb"):
+                    py_file = full_path[:-6] + ".py"
+                elif full_path.endswith(".IPYNB"):
+                    py_file = full_path[:-6] + ".py"
+                else:
+                    # Handle mixed case
+                    py_file = full_path[:full_path.lower().rfind(".ipynb")] + ".py"
                 with open(py_file, "w", encoding="utf-8") as f:
                     f.write(script)
                 print(f"{COLOR_GREEN}Saved as: {py_file}{COLOR_RESET}")
